@@ -80,7 +80,7 @@ CineLonel is a modern, responsive web application that serves as a comprehensive
 #### Method 1: Local Development
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/cinelonel-nuxt.git
+git clone https://github.com/AhmeTpz/CineLonel
 cd cinelonel-nuxt
 
 # Install dependencies
