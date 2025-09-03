@@ -97,7 +97,7 @@ npm run dev
 #### Method 2: Docker Deployment
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/cinelonel-nuxt.git
+git clone https://github.com/AhmeTpz/CineLonel
 cd cinelonel-nuxt
 
 # Build and run with Docker Compose
