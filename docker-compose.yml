@@ -1,0 +1,22 @@
+# ===================================================
+# DOCKER COMPOSE - CineLonel
+# ===================================================
+
+version: '3.8'
+
+services:
+  cinelonel:
+    build: .
+    
+    ports:
+      - "3000:3000"
+    
+    environment:
+      - NODE_ENV=development
+      - TMDB_API_KEY=348088421ad3fb3a9d6e56bb6a9a8f80
+    
+    volumes:
+      - .:/app
+      - /app/node_modules
+    
+    restart: unless-stopped
