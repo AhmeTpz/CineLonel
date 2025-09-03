@@ -254,7 +254,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you have any questions or need support:
 - Create an issue on GitHub
 - Live Demo: [https://cinelonel.vercel.app](https://cinelonel.vercel.app)
-- Project URL: [https://github.com/yourusername/cinelonel-nuxt]
+- Project URL: [https://github.com/AhmeTpz/CineLonel]
 
 ---
 
