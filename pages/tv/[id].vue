@@ -98,14 +98,12 @@ const showCastCrewModal = ref(false)
 
 const showId = computed(() => Number(route.params.id))
 
-// Runtime formatı
 const formatRuntime = (minutes: number) => {
   const hours = Math.floor(minutes / 60)
   const mins = minutes % 60
   return `${hours}h ${mins}m`
 }
 
-// Tarih formatı
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -114,12 +112,10 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Vote average formatı
 const formatVoteAverage = (vote: number) => {
   return Math.round(vote * 10)
 }
 
-// Favori işlemleri
 const toggleFavorite = () => {
   if (!show.value) return
   
@@ -135,7 +131,6 @@ const toggleFavorite = () => {
   favoritesStore.toggleFavorite(favoriteItem)
 }
 
-// Trailer işlemleri
 const playTrailer = () => {
   const trailer = videos.value.find(video => video.type === 'Trailer' && video.site === 'YouTube')
   if (trailer) {
@@ -165,7 +160,6 @@ const closeCastCrewModal = () => {
   showCastCrewModal.value = false
 }
 
-// Crew'ları departmanlara göre grupla
 const groupedCrew = computed(() => {
   const groups: Record<string, Crew[]> = {}
   if (allCrew.value) {
@@ -180,39 +174,30 @@ const groupedCrew = computed(() => {
   return groups
 })
 
-// TV Show verilerini yükle
 async function fetchShowDetails() {
   try {
     isLoading.value = true
     
-    // TV Show detayları
     const showResponse = await request<TvShow>(`/tv/${showId.value}`)
     show.value = showResponse
     
-    // Oyuncular ve Crew
     try {
-      // TMDB API'den hem normal hem aggregate credits deneyelim
       let creditsResponse;
       let isAggregate = false;
       try {
-        // Önce aggregate credits dene
         creditsResponse = await request<any>(`/tv/${showId.value}/aggregate_credits`, {
           language: 'en-US'
         })
         isAggregate = true;
       } catch (aggregateError) {
-        // Aggregate credits başarısızsa normal credits kullan
         creditsResponse = await request<any>(`/tv/${showId.value}/credits`, {
           language: 'en-US'
         })
         isAggregate = false;
       }
       
-      // Credits yapısını handle et (normal veya aggregate)
       if (creditsResponse && creditsResponse.cast) {
-        // Aggregate credits mi normal credits mi kontrol et
         if (creditsResponse.cast[0]?.roles) {
-          // Aggregate credits yapısı
           allCast.value = creditsResponse.cast.map((person: any) => ({
             id: person.id,
             name: person.name,
@@ -221,7 +206,6 @@ async function fetchShowDetails() {
             order: person.order || 0
           }))
         } else {
-          // Normal credits yapısı
           allCast.value = creditsResponse.cast
         }
         cast.value = allCast.value.slice(0, 10)
@@ -232,7 +216,6 @@ async function fetchShowDetails() {
       
       if (creditsResponse && creditsResponse.crew) {
         if (isAggregate) {
-          // Aggregate credits yapısı - tüm job'ları al ve departmanları düzelt
           allCrew.value = creditsResponse.crew.flatMap((person: any) => {
             if (person.jobs && person.jobs.length > 0) {
               return person.jobs.map((job: any) => ({
@@ -253,9 +236,7 @@ async function fetchShowDetails() {
             }
           })
           
-          // Departmanları düzelt - aggregate credits'te departman bilgisi eksik olabilir
           allCrew.value = allCrew.value.map(crew => {
-            // Job'a göre departman tahmin et
             const job = crew.job.toLowerCase();
             let department = crew.department;
             
@@ -284,7 +265,6 @@ async function fetchShowDetails() {
             return { ...crew, department };
           });
         } else {
-          // Normal credits yapısı
           allCrew.value = creditsResponse.crew
         }
       } else {
@@ -296,19 +276,15 @@ async function fetchShowDetails() {
       cast.value = []
     }
     
-    // Provider'lar
     const providersResponse = await request<{ results: { US: any } }>(`/tv/${showId.value}/watch/providers`)
     providers.value = providersResponse.results?.US || {}
     
-    // Keywords
     const keywordsResponse = await request<{ results: Keyword[] }>(`/tv/${showId.value}/keywords`)
     keywords.value = keywordsResponse.results || []
     
-    // Videos/Trailers
     const videosResponse = await request<{ results: Video[] }>(`/tv/${showId.value}/videos`)
     videos.value = videosResponse.results || []
     
-    // Seasons
     const seasonsResponse = await request<{ seasons: any[] }>(`/tv/${showId.value}`)
     if (seasonsResponse.seasons) {
       show.value.seasons = seasonsResponse.seasons

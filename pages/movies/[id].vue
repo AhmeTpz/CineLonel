@@ -92,14 +92,12 @@ const showCastCrewModal = ref(false)
 
 const movieId = computed(() => Number(route.params.id))
 
-// Runtime formatı
 const formatRuntime = (minutes: number) => {
   const hours = Math.floor(minutes / 60)
   const mins = minutes % 60
   return `${hours}h ${mins}m`
 }
 
-// Para formatı
 const formatMoney = (amount: number) => {
   if (amount === 0) return 'Unknown'
   return new Intl.NumberFormat('en-US', {
@@ -110,7 +108,6 @@ const formatMoney = (amount: number) => {
   }).format(amount)
 }
 
-// Tarih formatı
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -119,10 +116,6 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Vote average formatı
-
-
-// Favori işlemleri
 const toggleFavorite = () => {
   if (!movie.value) return
   
@@ -138,7 +131,6 @@ const toggleFavorite = () => {
   favoritesStore.toggleFavorite(favoriteItem)
 }
 
-// Trailer işlemleri
 const playTrailer = () => {
   const trailer = videos.value.find(video => video.type === 'Trailer' && video.site === 'YouTube')
   if (trailer) {
@@ -160,7 +152,6 @@ const closeCastCrewModal = () => {
   showCastCrewModal.value = false
 }
 
-// Crew'ları departmanlara göre grupla
 const groupedCrew = computed(() => {
   const groups: Record<string, Crew[]> = {}
   if (allCrew.value) {
@@ -174,16 +165,13 @@ const groupedCrew = computed(() => {
   return groups
 })
 
-// Film verilerini yükle
 async function fetchMovieDetails() {
   try {
     isLoading.value = true
     
-    // Film detayları
     const movieResponse = await request<Movie>(`/movie/${movieId.value}`)
     movie.value = movieResponse
     
-    // Oyuncular ve Crew
           try {
         const creditsResponse = await request<any>(`/movie/${movieId.value}/credits`, {
           language: 'en-US'
@@ -208,15 +196,12 @@ async function fetchMovieDetails() {
         cast.value = []
       }
     
-    // Provider'lar
     const providersResponse = await request<{ results: { US: any } }>(`/movie/${movieId.value}/watch/providers`)
     providers.value = providersResponse.results?.US || {}
     
-    // Keywords
     const keywordsResponse = await request<{ keywords: Keyword[] }>(`/movie/${movieId.value}/keywords`)
     keywords.value = keywordsResponse.keywords || []
     
-    // Videos/Trailers
     const videosResponse = await request<{ results: Video[] }>(`/movie/${movieId.value}/videos`)
     videos.value = videosResponse.results || []
     

@@ -1,5 +1,5 @@
 # ===================================================
-# BASIT DOCKERFILE - CineLonel Projesi
+# DOCKERFILE - CineLonel
 # ===================================================
 
 FROM node:20

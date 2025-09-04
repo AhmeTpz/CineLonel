@@ -78,7 +78,6 @@ const departmentFilter = ref('all')
 
 const personId = computed(() => Number(route.params.id))
 
-// Tarih formatı
 const formatDate = (dateString: string) => {
   if (!dateString) return ''
   const date = new Date(dateString)
@@ -89,7 +88,6 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Yaş hesaplama
 const calculateAge = (birthday: string, deathday?: string | null) => {
   if (!birthday) return null
   const birth = new Date(birthday)
@@ -103,26 +101,21 @@ const calculateAge = (birthday: string, deathday?: string | null) => {
   return age
 }
 
-// Vote average formatı
 const formatVoteAverage = (vote: number) => {
   return Math.round(vote * 10)
 }
 
 
 
-// TV kredisi için doğru tarihi al
 const getTvCreditDate = (credit: TvCredit) => {
-  // Önce first_episode_air_date varsa onu kullan, yoksa first_air_date
   return credit.first_episode_air_date || credit.first_air_date
 }
 
 
 
-// Filtrelenmiş acting kredileri
 const filteredActingCredits = computed(() => {
   let credits = [...actingCredits.value]
   
-  // Filter by media type
   if (mediaTypeFilter.value === 'movie') {
     credits = credits.filter(credit => credit.media_type === 'movie')
   } else if (mediaTypeFilter.value === 'tv') {
@@ -132,11 +125,9 @@ const filteredActingCredits = computed(() => {
   return credits
 })
 
-// Filtrelenmiş production kredileri
 const filteredProductionCredits = computed(() => {
   let credits = [...productionCredits.value]
   
-  // Filter by media type
   if (mediaTypeFilter.value === 'movie') {
     credits = credits.filter(credit => credit.media_type === 'movie')
   } else if (mediaTypeFilter.value === 'tv') {
@@ -146,11 +137,9 @@ const filteredProductionCredits = computed(() => {
   return credits
 })
 
-// Filtrelenmiş directing kredileri
 const filteredDirectingCredits = computed(() => {
   let credits = [...directingCredits.value]
   
-  // Filter by media type
   if (mediaTypeFilter.value === 'movie') {
     credits = credits.filter(credit => credit.media_type === 'movie')
   } else if (mediaTypeFilter.value === 'tv') {
@@ -160,28 +149,21 @@ const filteredDirectingCredits = computed(() => {
   return credits
 })
 
-// Oyuncunun önemine göre sıralanmış "Known For" kredileri (en önemli 10 yapım)
 const topKnownForCredits = computed(() => {
-  // Tüm kredileri birleştir ve tekrar eden yapımları birleştir
   const allCredits = [...actingCredits.value, ...productionCredits.value, ...directingCredits.value]
-  
-  // Yapımları ID'ye göre grupla ve her yapım için tüm rolleri birleştir
   const groupedCredits = new Map()
   
   allCredits.forEach(credit => {
     const key = `${credit.media_type}-${credit.id}`
     
     if (!groupedCredits.has(key)) {
-      // İlk kez görülen yapım
       groupedCredits.set(key, {
         ...credit,
         roles: [credit.character || credit.job],
         departments: [credit.character ? 'Acting' : (credit.job?.toLowerCase().includes('producer') ? 'Production' : 'Directing')],
-        // Oyuncunun o yapımdaki önemini hesapla
         importance: calculateImportance(credit)
       })
     } else {
-      // Zaten var olan yapım, rolü ekle
       const existing = groupedCredits.get(key)
       if (credit.character && !existing.roles.includes(credit.character)) {
         existing.roles.push(credit.character)
@@ -195,7 +177,6 @@ const topKnownForCredits = computed(() => {
         existing.departments.push(dept)
       }
       
-      // Önem skorunu güncelle (en yüksek skoru al)
       const newImportance = calculateImportance(credit)
       if (newImportance > existing.importance) {
         existing.importance = newImportance
@@ -203,29 +184,22 @@ const topKnownForCredits = computed(() => {
     }
   })
   
-  // Gruplandırılmış kredileri diziye çevir
   const uniqueCredits = Array.from(groupedCredits.values())
   
-  // Oyuncunun önemine göre sırala
   uniqueCredits.sort((a, b) => b.importance - a.importance)
   
-  // En önemli 10 yapımı döndür
   return uniqueCredits.slice(0, 10)
 })
 
-// View More için tüm krediler (30 yapım)
 const allKnownForCredits = computed(() => {
-  // Tüm kredileri birleştir ve tekrar eden yapımları birleştir
   const allCredits = [...actingCredits.value, ...productionCredits.value, ...directingCredits.value]
   
-  // Yapımları ID'ye göre grupla ve her yapım için tüm rolleri birleştir
   const groupedCredits = new Map()
   
   allCredits.forEach(credit => {
     const key = `${credit.media_type}-${credit.id}`
     
     if (!groupedCredits.has(key)) {
-      // İlk kez görülen yapım
       groupedCredits.set(key, {
         ...credit,
         roles: [credit.character || credit.job],
@@ -233,7 +207,6 @@ const allKnownForCredits = computed(() => {
         importance: calculateImportance(credit)
       })
     } else {
-      // Zaten var olan yapım, rolü ekle
       const existing = groupedCredits.get(key)
       if (credit.character && !existing.roles.includes(credit.character)) {
         existing.roles.push(credit.character)
@@ -247,7 +220,6 @@ const allKnownForCredits = computed(() => {
         existing.departments.push(dept)
       }
       
-      // Önem skorunu güncelle (en yüksek skoru al)
       const newImportance = calculateImportance(credit)
       if (newImportance > existing.importance) {
         existing.importance = newImportance
@@ -255,83 +227,65 @@ const allKnownForCredits = computed(() => {
     }
   })
   
-  // Gruplandırılmış kredileri diziye çevir
   const uniqueCredits = Array.from(groupedCredits.values())
   
-  // Oyuncunun önemine göre sırala
   uniqueCredits.sort((a, b) => b.importance - a.importance)
   
-  // En önemli 30 yapımı döndür
   return uniqueCredits.slice(0, 30)
 })
 
-// Oyuncunun bir yapımdaki önemini hesaplayan fonksiyon
 const calculateImportance = (credit: any) => {
   let importance = 0
   
-  // Acting kredileri için
   if (credit.character) {
-    // Order değeri varsa kullan (0 = başrol, 1 = ikincil, vs.)
     if (credit.order !== undefined) {
-      // Başrol (order 0-2) için çok yüksek bonus
       if (credit.order <= 2) {
-        importance += 1000 // Başrol bonusu
+        importance += 1000
       } else if (credit.order <= 5) {
-        importance += 500 // İkincil rol bonusu
+        importance += 500
       } else {
-        importance += 100 // Küçük rol
+        importance += 100
       }
     }
     
-    // Popülerlik puanı - film ve dizi dengesi
     if (credit.vote_average) {
-      importance += credit.vote_average * 50 // 0-500 puan
+      importance += credit.vote_average * 50
     }
     
-    // Vote count - film ve dizi için farklı ağırlık
     if (credit.vote_count) {
       if (credit.media_type === 'movie') {
-        // Filmler için daha düşük ağırlık (genelde daha yüksek vote_count)
         importance += Math.min(credit.vote_count / 200, 250)
       } else {
-        // Diziler için daha yüksek ağırlık (genelde daha düşük vote_count)
         importance += Math.min(credit.vote_count / 50, 350)
       }
     }
     
-    // Popülerlik skoru - film ve dizi dengesi
     if (credit.vote_average && credit.vote_count) {
       let popularityScore
       if (credit.media_type === 'movie') {
-        // Filmler için daha düşük ağırlık
         popularityScore = credit.vote_average * Math.log(credit.vote_count + 1) * 15
       } else {
-        // Diziler için daha yüksek ağırlık
         popularityScore = credit.vote_average * Math.log(credit.vote_count + 1) * 25
       }
       importance += popularityScore
     }
   }
   
-  // Production/Directing kredileri için
   if (credit.job) {
-    // Job türüne göre önem
     if (credit.job.toLowerCase().includes('director')) {
-      importance += 800 // Director bonusu
+      importance += 800 
     } else if (credit.job.toLowerCase().includes('executive producer')) {
-      importance += 600 // Executive Producer bonusu
+      importance += 600
     } else if (credit.job.toLowerCase().includes('producer')) {
-      importance += 500 // Producer bonusu
+      importance += 500
     } else {
-      importance += 200 // Diğer crew pozisyonları
+      importance += 200
     }
     
-    // Popülerlik puanı - film ve dizi dengesi
     if (credit.vote_average) {
       importance += credit.vote_average * 30
     }
     
-    // Vote count - film ve dizi için farklı ağırlık
     if (credit.vote_count) {
       if (credit.media_type === 'movie') {
         importance += Math.min(credit.vote_count / 300, 150)
@@ -340,7 +294,6 @@ const calculateImportance = (credit: any) => {
       }
     }
     
-    // Popülerlik skoru - film ve dizi dengesi
     if (credit.vote_average && credit.vote_count) {
       let popularityScore
       if (credit.media_type === 'movie') {
@@ -355,7 +308,6 @@ const calculateImportance = (credit: any) => {
   return importance
 }
 
-// Resim modal işlemleri
 const openImageModal = (image: Image) => {
   selectedImage.value = image
   showImageModal.value = true
@@ -366,20 +318,16 @@ const closeImageModal = () => {
   selectedImage.value = null
 }
 
-// Kişi verilerini yükle
 async function fetchPersonDetails() {
   try {
     isLoading.value = true
     
-    // Kişi detayları
     const personResponse = await request<Person>(`/person/${personId.value}`)
     person.value = personResponse
     
-    // Film ve TV kredileri
     const creditsResponse = await request<any>(`/person/${personId.value}/combined_credits`)
     
     if (creditsResponse && creditsResponse.cast) {
-      // Acting kredileri (cast)
       actingCredits.value = creditsResponse.cast.sort((a: any, b: any) => {
         const dateA = a.media_type === 'movie' ? a.release_date : (a.first_episode_air_date || a.first_air_date)
         const dateB = b.media_type === 'movie' ? b.release_date : (b.first_episode_air_date || b.first_air_date)
@@ -387,9 +335,7 @@ async function fetchPersonDetails() {
       })
     }
     
-    // Production ve Directing kredileri (crew)
     if (creditsResponse && creditsResponse.crew) {
-      // Production kredileri (producer'lar)
       productionCredits.value = creditsResponse.crew
         .filter((credit: any) => credit.job?.toLowerCase().includes('producer'))
         .sort((a: any, b: any) => {
@@ -398,7 +344,6 @@ async function fetchPersonDetails() {
           return new Date(dateB || '1900-01-01').getTime() - new Date(dateA || '1900-01-01').getTime()
         })
       
-      // Directing kredileri (director'lar)
       directingCredits.value = creditsResponse.crew
         .filter((credit: any) => credit.job?.toLowerCase().includes('director'))
         .sort((a: any, b: any) => {
@@ -408,12 +353,10 @@ async function fetchPersonDetails() {
         })
     }
     
-    // Resimler
     const imagesResponse = await request<{ profiles: Image[] }>(`/person/${personId.value}/images`)
     images.value = imagesResponse.profiles || []
     
       } catch (error) {
-      // Person details fetch error - ignore
     } finally {
     isLoading.value = false
   }
