@@ -80,7 +80,7 @@ CineLonel is a modern, responsive web application that serves as a comprehensive
 #### Method 1: Local Development
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/cinelonel-nuxt.git
+git clone https://github.com/AhmeTpz/CineLonel
 cd cinelonel-nuxt
 
 # Install dependencies
@@ -97,7 +97,7 @@ npm run dev
 #### Method 2: Docker Deployment
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/cinelonel-nuxt.git
+git clone https://github.com/AhmeTpz/CineLonel
 cd cinelonel-nuxt
 
 # Build and run with Docker Compose
@@ -254,7 +254,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you have any questions or need support:
 - Create an issue on GitHub
 - Live Demo: [https://cinelonel.vercel.app](https://cinelonel.vercel.app)
-- Project URL: [https://github.com/yourusername/cinelonel-nuxt]
+- Project URL: [https://github.com/AhmeTpz/CineLonel]
 
 ---
 
