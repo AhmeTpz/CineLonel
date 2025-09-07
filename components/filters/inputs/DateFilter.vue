@@ -51,7 +51,7 @@ onMounted(() => {
 <template>
   <div class="space-y-3">
     <label class="block text-green-700 font-medium text-sm">
-      {{ contentType === 'movie' ? 'Release Year' : 'First Air Date' }}
+      {{ contentType === 'movie' ? 'Release Date' : 'First Air Date' }}
     </label>
     <div class="bg-green-50 rounded-lg p-4 border border-green-100 relative">
       <!-- DATE RANGE CONTAINER / TARİH ARALIĞI KONTEYNER -->
