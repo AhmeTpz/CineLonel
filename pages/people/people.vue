@@ -20,7 +20,7 @@ interface Person {
 const items = ref<Person[]>([])
 const isLoading = ref(false)
 const totalPages = ref(0)
-const UI_MAX_PAGE = 500
+const UI_MAX_PAGE = 250
 
 const page = computed(() => {
   const pageParam = Number(route.query.page) || 1
@@ -53,8 +53,31 @@ async function fetchPeople(pageNum: number) {
       return true
     })
 
+    if (uniqueResults.length < 40) {
+      let currentApiPage = apiPage2 + 1
+      
+      while (uniqueResults.length < 40 && currentApiPage <= (response1.total_pages || 0)) {
+        try {
+          const additionalResponse = await request<{ total_pages: number; results: Person[] }>('/person/popular', { page: currentApiPage })
+          
+          if (additionalResponse.results) {
+            for (const person of additionalResponse.results) {
+              if (!seenIds.has(person.id) && uniqueResults.length < 40) {
+                seenIds.add(person.id)
+                uniqueResults.push(person)
+              }
+            }
+          }
+          
+          currentApiPage++
+        } catch (error) {
+          break
+        }
+      }
+    }
+
     items.value = uniqueResults
-    totalPages.value = Math.min(response1.total_pages || 0, UI_MAX_PAGE)
+    totalPages.value = Math.min(Math.ceil((response1.total_pages || 0) / 2), UI_MAX_PAGE)
   } catch (error) {
     items.value = []
   } finally {
@@ -109,7 +132,6 @@ function go(p: number) {
         />
       </template>
 
-      <!-- People Grid with Animation - 8 per row -->
       <div class="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4">
         <div v-for="(person, index) in items" :key="person.id"
              class="animate-fade-in-up"
